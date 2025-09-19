@@ -4,6 +4,9 @@ import { StudyStorage } from '@/lib/studyStorage';
 import { SubjectCard, ChapterCard, TopicCard } from '@/components/StudyCards';
 import { Breadcrumb } from '@/components/Breadcrumb';
 import { StudyStatsCards } from '@/components/StudyStats';
+import { StudyTimers } from '@/components/StudyTimers';
+import { Auth } from '@/components/Auth';
+import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -12,19 +15,37 @@ import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Label } from '@/components/ui/label';
-import { Plus, BookOpen, GraduationCap, Trophy, Moon, Sun } from 'lucide-react';
+import { Plus, BookOpen, GraduationCap, Trophy, Moon, Sun, LogOut, User } from 'lucide-react';
 import { useTheme } from 'next-themes';
 import { toast } from '@/hooks/use-toast';
 
 type ViewMode = 'subjects' | 'chapters' | 'topics';
 
 const Index = () => {
+  const { user, loading, signOut } = useAuth();
   const [data, setData] = useState<StudyData>({ subjects: [] });
   const [currentSubject, setCurrentSubject] = useState<StudySubject | null>(null);
   const [currentChapter, setCurrentChapter] = useState<StudyChapter | null>(null);
   const [viewMode, setViewMode] = useState<ViewMode>('subjects');
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const { theme, setTheme } = useTheme();
+
+  // Show loading screen while checking auth
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-background via-background to-accent/20 flex items-center justify-center">
+        <div className="text-center space-y-4 animate-fade-in">
+          <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-primary mx-auto"></div>
+          <h2 className="text-2xl font-extrabold font-mono">Loading your study tracker...</h2>
+        </div>
+      </div>
+    );
+  }
+
+  // Show auth screen if not logged in
+  if (!user) {
+    return <Auth />;
+  }
 
   // Form states
   const [newSubjectName, setNewSubjectName] = useState('');
@@ -276,27 +297,41 @@ const Index = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-gradient-to-br from-background via-background to-accent/10 animate-fade-in">
       {/* Header */}
-      <header className="bg-gradient-to-r from-primary to-primary-hover text-primary-foreground p-6 shadow-lg">
+      <header className="bg-gradient-to-r from-primary via-primary-hover to-primary text-primary-foreground p-6 shadow-2xl animate-slide-up">
         <div className="container mx-auto flex items-center justify-between">
           <div className="flex items-center gap-4">
-            <GraduationCap className="w-8 h-8" />
+            <div className="p-2 bg-primary-foreground/20 rounded-lg animate-glow">
+              <GraduationCap className="w-8 h-8 animate-float" />
+            </div>
             <div>
               <h1 className="text-3xl font-extrabold font-mono">B.Tech Study Tracker</h1>
-              <p className="text-primary-foreground/80 font-mono">Master your academics with organized study planning</p>
+              <p className="text-primary-foreground/80 font-mono">Master your academics with AI-powered study planning</p>
             </div>
           </div>
           <div className="flex items-center gap-4">
+            <div className="flex items-center gap-2 text-sm">
+              <User className="w-4 h-4" />
+              <span className="font-mono">Welcome, {user.email?.split('@')[0]}</span>
+            </div>
             <Button
               variant="ghost"
               size="sm"
               onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
-              className="text-primary-foreground hover:bg-primary-foreground/20"
+              className="text-primary-foreground hover:bg-primary-foreground/20 interactive-button"
             >
               {theme === 'dark' ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
             </Button>
-            <Badge className="bg-success text-success-foreground font-mono">
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={signOut}
+              className="text-primary-foreground hover:bg-primary-foreground/20 interactive-button"
+            >
+              <LogOut className="w-4 h-4" />
+            </Button>
+            <Badge className="bg-success text-success-foreground font-mono animate-bounce-in">
               <Trophy className="w-3 h-3 mr-1" />
               Level 1 Student
             </Badge>
@@ -306,75 +341,106 @@ const Index = () => {
 
       {/* Main Content */}
       <main className="container mx-auto p-6">
-        <Breadcrumb
-          currentSubject={currentSubject}
-          currentChapter={currentChapter}
-          onHomeClick={navigateHome}
-          onSubjectClick={navigateToSubject}
-        />
+        <div className="animate-fade-in">
+          <Breadcrumb
+            currentSubject={currentSubject}
+            currentChapter={currentChapter}
+            onHomeClick={navigateHome}
+            onSubjectClick={navigateToSubject}
+          />
+        </div>
 
         {viewMode === 'subjects' && <StudyStatsCards data={data} />}
+        
+        {/* Study Timers */}
+        <StudyTimers />
 
         {/* Content Area */}
         <div className="space-y-6">
           {viewMode === 'subjects' && (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {data.subjects.map((subject) => (
-                <SubjectCard
-                  key={subject.id}
-                  subject={subject}
-                  onSubjectClick={navigateToSubject}
-                  onAddChapter={() => {}}
-                />
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 animate-slide-up">
+              {data.subjects.map((subject, index) => (
+                <div key={subject.id} className="animate-fade-in hover-lift" style={{ animationDelay: `${index * 0.1}s` }}>
+                  <SubjectCard
+                    subject={subject}
+                    onSubjectClick={navigateToSubject}
+                    onAddChapter={() => {}}
+                  />
+                </div>
               ))}
               {data.subjects.length === 0 && (
-                <Card className="study-card col-span-full text-center p-8">
-                  <BookOpen className="w-16 h-16 mx-auto text-muted-foreground mb-4" />
-                  <h3 className="text-xl font-bold font-mono mb-2">No subjects yet</h3>
-                  <p className="text-muted-foreground mb-4">Start by adding your first subject to begin tracking your B.Tech studies!</p>
+                <Card className="focus-card col-span-full text-center p-12 animate-bounce-in">
+                  <div className="animate-float">
+                    <BookOpen className="w-20 h-20 mx-auto text-primary mb-6 animate-pulse-slow" />
+                  </div>
+                  <h3 className="text-2xl font-extrabold font-mono mb-4 bg-gradient-to-r from-primary to-primary-hover bg-clip-text text-transparent">
+                    Ready to start your learning journey?
+                  </h3>
+                  <p className="text-muted-foreground mb-6 text-lg">
+                    Add your first subject and begin tracking your B.Tech studies with AI-powered insights!
+                  </p>
+                  <div className="flex justify-center">
+                    <Badge className="bg-primary/10 text-primary animate-glow">
+                      Click the + button to get started
+                    </Badge>
+                  </div>
                 </Card>
               )}
             </div>
           )}
 
           {viewMode === 'chapters' && currentSubject && (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {currentSubject.chapters.map((chapter) => (
-                <ChapterCard
-                  key={chapter.id}
-                  chapter={chapter}
-                  subjectColor={currentSubject.color}
-                  onChapterClick={navigateToChapter}
-                  onAddTopic={() => {}}
-                />
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 animate-slide-up">
+              {currentSubject.chapters.map((chapter, index) => (
+                <div key={chapter.id} className="animate-fade-in hover-lift" style={{ animationDelay: `${index * 0.1}s` }}>
+                  <ChapterCard
+                    chapter={chapter}
+                    subjectColor={currentSubject.color}
+                    onChapterClick={navigateToChapter}
+                    onAddTopic={() => {}}
+                  />
+                </div>
               ))}
               {currentSubject.chapters.length === 0 && (
-                <Card className="study-card col-span-full text-center p-8">
-                  <BookOpen className="w-16 h-16 mx-auto text-muted-foreground mb-4" />
-                  <h3 className="text-xl font-bold font-mono mb-2">No chapters yet</h3>
-                  <p className="text-muted-foreground mb-4">Add chapters to organize your {currentSubject.name} studies!</p>
+                <Card className="focus-card col-span-full text-center p-12 animate-bounce-in">
+                  <div className="animate-float">
+                    <BookOpen className="w-20 h-20 mx-auto text-primary mb-6 animate-pulse-slow" />
+                  </div>
+                  <h3 className="text-2xl font-extrabold font-mono mb-4">
+                    Time to add chapters!
+                  </h3>
+                  <p className="text-muted-foreground mb-6 text-lg">
+                    Organize your {currentSubject.name} studies by adding chapters and topics.
+                  </p>
                 </Card>
               )}
             </div>
           )}
 
           {viewMode === 'topics' && currentChapter && (
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              {currentChapter.topics.map((topic) => (
-                <TopicCard
-                  key={topic.id}
-                  topic={topic}
-                  subjectColor={currentSubject?.color || '#3B82F6'}
-                  onTopicComplete={handleTopicComplete}
-                  onAddRevision={handleAddRevision}
-                  onTopicEdit={() => {}}
-                />
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 animate-slide-up">
+              {currentChapter.topics.map((topic, index) => (
+                <div key={topic.id} className="animate-fade-in hover-lift" style={{ animationDelay: `${index * 0.1}s` }}>
+                  <TopicCard
+                    topic={topic}
+                    subjectColor={currentSubject?.color || '#3B82F6'}
+                    onTopicComplete={handleTopicComplete}
+                    onAddRevision={handleAddRevision}
+                    onTopicEdit={() => {}}
+                  />
+                </div>
               ))}
               {currentChapter.topics.length === 0 && (
-                <Card className="study-card col-span-full text-center p-8">
-                  <BookOpen className="w-16 h-16 mx-auto text-muted-foreground mb-4" />
-                  <h3 className="text-xl font-bold font-mono mb-2">No topics yet</h3>
-                  <p className="text-muted-foreground mb-4">Add topics to start studying {currentChapter.name}!</p>
+                <Card className="focus-card col-span-full text-center p-12 animate-bounce-in">
+                  <div className="animate-float">
+                    <BookOpen className="w-20 h-20 mx-auto text-primary mb-6 animate-pulse-slow" />
+                  </div>
+                  <h3 className="text-2xl font-extrabold font-mono mb-4">
+                    Let's add some topics!
+                  </h3>
+                  <p className="text-muted-foreground mb-6 text-lg">
+                    Start studying {currentChapter.name} by adding your first topic.
+                  </p>
                 </Card>
               )}
             </div>

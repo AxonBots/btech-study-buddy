@@ -190,6 +190,46 @@
   }
 
   .floating-action {
-    @apply fixed bottom-6 right-6 w-14 h-14 bg-gradient-to-r from-primary to-primary-hover text-primary-foreground rounded-full shadow-lg hover:shadow-xl transition-all duration-300 flex items-center justify-center z-50;
+    @apply fixed bottom-6 right-6 w-14 h-14 bg-gradient-to-r from-primary to-primary-hover text-primary-foreground rounded-full shadow-lg hover:shadow-xl transition-all duration-300 flex items-center justify-center z-50 animate-float hover:animate-glow;
+  }
+
+  .timer-display {
+    @apply text-6xl font-extrabold font-mono bg-gradient-to-r from-primary to-primary-hover bg-clip-text text-transparent animate-pulse-slow;
+  }
+
+  .timer-controls {
+    @apply flex gap-4 items-center justify-center animate-slide-up;
+  }
+
+  .focus-card {
+    @apply bg-gradient-to-br from-card via-card to-accent/20 backdrop-blur-lg border border-border/30 rounded-2xl shadow-2xl hover:shadow-2xl transition-all duration-500 animate-scale-in;
+  }
+
+  .auth-card {
+    @apply bg-gradient-to-br from-card to-card/90 backdrop-blur-xl border border-border/50 rounded-2xl shadow-2xl animate-fade-in;
+  }
+
+  .interactive-button {
+    @apply transition-all duration-200 hover:scale-105 active:scale-95 hover:shadow-lg active:shadow-sm;
+  }
+
+  .study-stats-grid {
+    @apply grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8 animate-fade-in;
+  }
+
+  .stats-card {
+    @apply study-card p-6 text-center hover:scale-105 transition-transform duration-300 animate-bounce-in;
+  }
+
+  .animated-progress {
+    @apply transition-all duration-700 ease-out;
+  }
+
+  .hover-lift {
+    @apply hover:-translate-y-1 hover:shadow-lg transition-all duration-300;
+  }
+
+  .glass-effect {
+    @apply bg-card/80 backdrop-blur-md border border-border/20;
   }
 }
