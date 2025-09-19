@@ -14,7 +14,99 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      profiles: {
+        Row: {
+          avatar_url: string | null
+          created_at: string
+          email: string
+          full_name: string | null
+          id: string
+          updated_at: string
+          user_id: string
+          username: string | null
+        }
+        Insert: {
+          avatar_url?: string | null
+          created_at?: string
+          email: string
+          full_name?: string | null
+          id?: string
+          updated_at?: string
+          user_id: string
+          username?: string | null
+        }
+        Update: {
+          avatar_url?: string | null
+          created_at?: string
+          email?: string
+          full_name?: string | null
+          id?: string
+          updated_at?: string
+          user_id?: string
+          username?: string | null
+        }
+        Relationships: []
+      }
+      studies: {
+        Row: {
+          chapter_name: string | null
+          completed: boolean | null
+          completed_date: string | null
+          created_at: string
+          difficulty: number | null
+          id: string
+          notes: string | null
+          priority: string | null
+          revision_count: number | null
+          study_date: string | null
+          study_mode: string | null
+          subject_color: string
+          subject_name: string
+          time_spent: number | null
+          topic_name: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          chapter_name?: string | null
+          completed?: boolean | null
+          completed_date?: string | null
+          created_at?: string
+          difficulty?: number | null
+          id?: string
+          notes?: string | null
+          priority?: string | null
+          revision_count?: number | null
+          study_date?: string | null
+          study_mode?: string | null
+          subject_color?: string
+          subject_name: string
+          time_spent?: number | null
+          topic_name?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          chapter_name?: string | null
+          completed?: boolean | null
+          completed_date?: string | null
+          created_at?: string
+          difficulty?: number | null
+          id?: string
+          notes?: string | null
+          priority?: string | null
+          revision_count?: number | null
+          study_date?: string | null
+          study_mode?: string | null
+          subject_color?: string
+          subject_name?: string
+          time_spent?: number | null
+          topic_name?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
